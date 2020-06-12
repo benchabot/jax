@@ -18,6 +18,7 @@ from functools import partial
 import os
 from random import shuffle
 from unittest import SkipTest
+import warnings
 
 import numpy as np
 from absl.testing import absltest
@@ -1209,6 +1210,16 @@ class PmapTest(jtu.JaxTestCase):
 
       out = pmap(lambda x: jax.lax.pmean(x, 'i'), 'i')(x)
       self.assertEqual(list(out), [1])
+
+  def testJitOfPmapWarningMessage(self):
+    def foo(x): return x
+
+    with warnings.catch_warnings(record=True) as w:
+      warnings.simplefilter("always")
+      jit(pmap(foo))(jnp.arange(4))
+
+      self.assertIn("The jitted function foo includes a pmap",
+                    str(w[-1].message))
 
 
 class PmapWithDevicesTest(jtu.JaxTestCase):

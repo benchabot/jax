@@ -611,11 +611,12 @@ def _xla_callable(fun: lu.WrappedFun, device, backend, name, donated_invars, *ar
   logging.log(log_priority, "Compiling %s for args %s.", fun.__name__, abstract_args)
 
   if nreps > 1:
-    print(f"The jitted function {fun.__name__} includes a pmap. Using "
-          "jit-of-pmap can lead to inefficient data movement, as the outer jit "
-          "does not preserve sharded data representations and instead collects "
-          "input and output arrays onto a single device. "
-          "Consider removing the outer jit unless you know what you're doing.")
+    warn(f"The jitted function {fun.__name__} includes a pmap. Using "
+         "jit-of-pmap can lead to inefficient data movement, as the outer jit "
+         "does not preserve sharded data representations and instead collects "
+         "input and output arrays onto a single device. "
+         "Consider removing the outer jit unless you know what you're doing. "
+         "See https://github.com/google/jax/issues/2926.")
 
   if nreps > xb.device_count(backend):
     raise ValueError(
