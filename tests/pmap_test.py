@@ -1212,11 +1212,12 @@ class PmapTest(jtu.JaxTestCase):
       self.assertEqual(list(out), [1])
 
   def testJitOfPmapWarningMessage(self):
+    device_count = xla_bridge.device_count()
     def foo(x): return x
 
     with warnings.catch_warnings(record=True) as w:
       warnings.simplefilter("always")
-      jit(pmap(foo))(jnp.arange(4))
+      jit(pmap(foo))(jnp.arange(device_count))
 
       self.assertIn("The jitted function foo includes a pmap",
                     str(w[-1].message))
